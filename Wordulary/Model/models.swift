@@ -41,3 +41,11 @@ struct UpdateProfileParams: Encodable {
     case website
   }
 }
+
+struct ScoreRow: Codable  {
+    let user_id: UUID
+    let bscore: Int
+    let iscore: Int
+    let ascore: Int
+    let updated_at: String
+}

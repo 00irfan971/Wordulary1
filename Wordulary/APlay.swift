@@ -1,14 +1,13 @@
 //
-//  BPlay.swift
+//  APlay.swift
 //  Wordulary
 //
-//  Created by Irfan on 18/06/25.
+//  Created by Irfan on 19/06/25.
 //
 
 import SwiftUI
-import PostgREST
 
-struct BPlay: View {
+struct APlay: View {
     
     @State private var items: [SentenceItem] = []
     @State private var currentIndex = 0
@@ -23,7 +22,7 @@ struct BPlay: View {
     @State private var flicker = true
     
     @Binding var path: NavigationPath
-
+    
     
     var body: some View {
         ZStack {
@@ -42,7 +41,7 @@ struct BPlay: View {
                                             .foregroundColor(.green)
                                             .padding(.leading, 8)
 
-                                        Text("\(bscore)")
+                                        Text("\(ascore)")
                                             .font(.custom("PressStart2P-Regular", size: 22))
                                             .foregroundColor(.green)
                                             .shadow(color: .green.opacity(0.8), radius: 5, x: 0, y: 0)
@@ -57,7 +56,7 @@ struct BPlay: View {
 
                                         Spacer()
                         
-                        Text("BEGINNER")
+                        Text("ADVANCED")
                             .font(.custom("PressStart2P-Regular", size: 16))
                             .foregroundColor(.cyan)
                             .opacity(flicker ? 1 : 0.85)
@@ -81,28 +80,34 @@ struct BPlay: View {
 
                     
                     ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
-                            .frame(width: 320, height: 150)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.purple, lineWidth: 4)
-                            )
-
-                        Text(item.sentence).foregroundStyle(Color.black)
+                        Text(item.sentence)
                             .font(.system(size: 25, weight: .bold, design: .rounded))
+                            .foregroundColor(.black)
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.purple, lineWidth: 4)
+                                    )
+                            )
+                            .padding(.top, 60)
+
                     }
                     .padding(.top, 60)
 
                     ZStack {
-                        Rectangle()
-                            .foregroundStyle(Color("Col3").opacity(0.9))
-                            .frame(width: 200, height: 100)
-                            .cornerRadius(20)
-
                         Text(item.option1)
                             .foregroundStyle(Color("Col1"))
                             .font(.system(size: 65, weight: .bold, design: .rounded))
+                            .padding(.horizontal, 30) // controls background width around text
+                            .padding(.vertical, 20)   // controls background height around text
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color("Col3").opacity(0.9))
+                            )
+
                         
                         
                         
@@ -121,14 +126,14 @@ struct BPlay: View {
                                     print("✅ Selected as correct")
                                     
                                     if item.correctOption == "1"{
-                                        bscore=bscore+10
+                                        ascore=ascore+10
                                     }
                                 } else if dragOffset.width < -100 {
                                     selection = "wrong"
                                     print("❌ Selected as wrong")
                                     
                                     if item.correctOption == "2"{
-                                        bscore=bscore+10
+                                        ascore=ascore+10
                                     }
                                 }
 
@@ -173,88 +178,13 @@ struct BPlay: View {
             }
         }
         .onAppear {
-            items = loadCSV(from: "sentences")
+            items = loadCSV2(from: "sentences")
             print("Loaded \(items.count) items")
-            
-            
-            Task {
-                await fetchScoreFromSupabase()
-            }
-            
-            
-            
-        }.onChange(of: bscore) {
-            Task {
-                await saveOrUpdateScore(bscore)
-            }
-        }
-
-    }
-    
-    func saveOrUpdateScore(_ bscore: Int) async {
-        guard let user = try? await supabase.auth.session.user else {
-            print("❌ User not logged in")
-            return
-        }
-
-        let payload = ScoreRow(
-            user_id: user.id,
-            bscore: bscore,
-            iscore: 0,
-            ascore:0,
-            updated_at: ISO8601DateFormatter().string(from: Date())
-        )
-
-        do {
-            try await supabase
-                .from("scores")
-                .upsert(payload)
-                .execute()
-
-            print("✅ Score saved or updated")
-        } catch {
-            print("❌ Error saving score: \(error)")
         }
     }
-    
-    
-    
-    
-
-    func fetchScoreFromSupabase() async {
-        guard let userId = try? await supabase.auth.session.user.id else {
-            print("User not logged in")
-            return
-        }
-
-        do {
-            let response: PostgrestResponse<ScoreRow> = try await supabase
-                .from("scores")
-                .select()
-                .eq("user_id", value: userId)
-                .limit(1)
-                .single()
-                .execute()
-
-            let scoreRow = response.value
-
-            // Update state
-            bscore = scoreRow.bscore
-            iscore = scoreRow.iscore
-            ascore = scoreRow.ascore
-
-            print("✅ Scores loaded from Supabase")
-
-        } catch {
-            print("❌ Failed to load scores: \(error)")
-        }
-    }
-
-
-
     
 }
 
 #Preview {
-    BPlay(path: .constant(NavigationPath()))
+    APlay(path: .constant(NavigationPath()))
 }

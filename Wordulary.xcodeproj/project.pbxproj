@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		5240DA982DF72B850056C12A /* TestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5240DA972DF72B850056C12A /* TestView.swift */; };
+		524C4EEC2E04019F0095050F /* APlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524C4EEB2E04019F0095050F /* APlay.swift */; };
+		524C4EEE2E041EF70095050F /* PlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524C4EED2E041EF70095050F /* PlayView.swift */; };
 		52599C6C2E013F6100259AFA /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52599C6B2E013F6100259AFA /* AuthView.swift */; };
 		52599C6F2E01411900259AFA /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52599C6E2E01411900259AFA /* ProfileView.swift */; };
 		52599C712E01431700259AFA /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52599C702E01431700259AFA /* AppView.swift */; };
@@ -55,6 +57,8 @@
 
 /* Begin PBXFileReference section */
 		5240DA972DF72B850056C12A /* TestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestView.swift; sourceTree = "<group>"; };
+		524C4EEB2E04019F0095050F /* APlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APlay.swift; sourceTree = "<group>"; };
+		524C4EED2E041EF70095050F /* PlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayView.swift; sourceTree = "<group>"; };
 		52599C6B2E013F6100259AFA /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		52599C6D2E01405800259AFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		52599C6E2E01411900259AFA /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -174,7 +178,9 @@
 				52AE49AB2DD859610080538C /* WordularyApp.swift */,
 				52AE49AD2DD859610080538C /* ContentView.swift */,
 				52599C742E029B8000259AFA /* HomeView.swift */,
+				524C4EED2E041EF70095050F /* PlayView.swift */,
 				52599C722E028B9400259AFA /* BPlay.swift */,
+				524C4EEB2E04019F0095050F /* APlay.swift */,
 				52E5E1C62DFAA20800278851 /* Supabase.swift */,
 				52599C6B2E013F6100259AFA /* AuthView.swift */,
 				52599C6E2E01411900259AFA /* ProfileView.swift */,
@@ -374,6 +380,8 @@
 				52E5E1CB2DFAB2AC00278851 /* csvParse.swift in Sources */,
 				52E5E1C72DFAA20800278851 /* Supabase.swift in Sources */,
 				52599C752E029B8000259AFA /* HomeView.swift in Sources */,
+				524C4EEE2E041EF70095050F /* PlayView.swift in Sources */,
+				524C4EEC2E04019F0095050F /* APlay.swift in Sources */,
 				52599C732E028B9400259AFA /* BPlay.swift in Sources */,
 				52599C6C2E013F6100259AFA /* AuthView.swift in Sources */,
 			);
