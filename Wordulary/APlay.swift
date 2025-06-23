@@ -21,6 +21,10 @@ struct APlay: View {
     @State private var iscore: Int = 0
     @State private var ascore: Int = 0
     
+    @State private var bindex: Int = 0
+    @State private var iindex: Int = 0
+    @State private var aindex: Int = 0
+    
     @State private var flicker = true
     
     @Binding var path: NavigationPath
@@ -31,8 +35,8 @@ struct APlay: View {
     
     var body: some View {
         ZStack {
-            if currentIndex < items.count {
-                let item = items[currentIndex]
+            if aindex < items.count {
+                let item = items[aindex]
                 
                 
 
@@ -131,14 +135,14 @@ struct APlay: View {
                                     print("✅ Selected as correct")
                                     
                                     if item.correctOption == "1"{
-                                        ascore=ascore+10
+                                        ascore=ascore+5
                                         
                                         sentenceBackground=Color.green
                                         
                                     }
                                     else{
                                         sentenceBackground=Color.red
-                                        
+                                        ascore=ascore-1
                                         triggerHapticFeedback(success: false)
                                     }
                                 } else if dragOffset.width < -100 {
@@ -146,7 +150,7 @@ struct APlay: View {
                                     print("❌ Selected as wrong")
                                     
                                     if item.correctOption == "2"{
-                                        ascore=ascore+10
+                                        ascore=ascore+5
                                         
                                         sentenceBackground=Color.green
                                         
@@ -154,6 +158,8 @@ struct APlay: View {
                                     }
                                     else{
                                         sentenceBackground=Color.red
+                                        
+                                        ascore=ascore-1
                                         triggerHapticFeedback(success: false)
                                     }
                                 }
@@ -166,7 +172,7 @@ struct APlay: View {
                                             sentenceBackground = Color.white
                                             
                                             selection = nil
-                                            currentIndex += 1
+                                            aindex += 1
                                         }
                                     }
                             }
@@ -207,6 +213,26 @@ struct APlay: View {
         .onAppear {
             items = loadCSV2(from: "sentences")
             print("Loaded \(items.count) items")
+            
+            
+            Task {
+                if let scores = await fetchScoreFromSupabase() {
+                    bscore = scores.bscore
+                    iscore = scores.iscore
+                    ascore = scores.ascore
+                    
+                    bindex = scores.bindex
+                    iindex = scores.iindex
+                    aindex = scores.aindex+1
+                    
+                }
+            }
+            
+            
+        }.onChange(of: aindex) {
+            Task {
+                await saveOrUpdateScore(bscore: bscore, iscore: iscore, ascore: ascore,bindex: bindex,iindex:iindex,aindex: aindex)
+            }
         }
     }
     

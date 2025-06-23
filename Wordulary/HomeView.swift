@@ -12,7 +12,13 @@ struct HomeView: View {
   
     @Binding var play:Int
     
+    @State private var bscore: Int = 0
+    @State private var iscore: Int = 0
+    @State private var ascore: Int = 0
+    
     @State private var path = NavigationPath()
+    
+    @State private var shouldRefreshScores = false
     
     var body: some View {
         
@@ -73,7 +79,7 @@ struct HomeView: View {
                                         .foregroundColor(.green)
                                         .shadow(color: .green, radius: 3)
                                     
-                                    Text("35")
+                                    Text("\(bscore)")
                                         .font(.title.bold())
                                         .foregroundColor(.white)
                                         .shadow(color: .green, radius: 4)
@@ -85,7 +91,7 @@ struct HomeView: View {
                                         .foregroundColor(.green)
                                         .shadow(color: .green, radius: 3)
                                     
-                                    Text("25")
+                                    Text("\(iscore)")
                                         .font(.title.bold())
                                         .foregroundColor(.white)
                                         .shadow(color: .green, radius: 4)
@@ -97,7 +103,7 @@ struct HomeView: View {
                                         .foregroundColor(.green)
                                         .shadow(color: .green, radius: 3)
                                     
-                                    Text("30")
+                                    Text("\(ascore)")
                                         .font(.title.bold())
                                         .foregroundColor(.white)
                                         .shadow(color: .green, radius: 4)
@@ -108,7 +114,7 @@ struct HomeView: View {
                     
                     
                     
-                    NavigationLink(destination: PlayView(path: .constant(NavigationPath()))) {
+                    NavigationLink(destination: PlayView(path: .constant(NavigationPath()),shouldRefresh: $shouldRefreshScores )) {
                         Text("Play!")
                             .font(.custom("PressStart2P-Regular", size: 26))
                             .foregroundColor(.blue)
@@ -125,7 +131,30 @@ struct HomeView: View {
                 }
             }
             
+        }.onAppear{
+            
+            Task {
+                if let scores = await fetchScoreFromSupabase() {
+                    bscore = scores.bscore
+                    iscore = scores.iscore
+                    ascore = scores.ascore
+                }
+            }
+            
+        }.onChange(of: shouldRefreshScores) {
+            if shouldRefreshScores {
+                Task {
+                    if let scores = await fetchScoreFromSupabase() {
+                        bscore = scores.bscore
+                        iscore = scores.iscore
+                        ascore = scores.ascore
+                    }
+                    shouldRefreshScores = false
+                }
+            }
         }
+
+
         
     }
 }

@@ -13,6 +13,8 @@ struct PlayView: View {
     
     @Binding var path: NavigationPath
     
+    @Binding var shouldRefresh: Bool
+    
     var body: some View {
 
             ZStack {
@@ -48,19 +50,19 @@ struct PlayView: View {
                     }
 
                     // Intermediate (placeholder, inactive)
-                    Button(action: { x = 2 }) {
+                    NavigationLink(destination: IPlay(path: $path)) {
                         Text("INTERMEDIATE")
                             .font(.custom("PressStart2P-Regular", size: 16))
-                            .foregroundColor(.orange)
+                            .foregroundColor(.yellow)
                             .padding(.vertical, 18)
-                            .padding(.horizontal, 30)
+                            .padding(.horizontal, 50)
                             .background(Color.black.opacity(0.8))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.orange, lineWidth: 2)
+                                    .stroke(Color.yellow, lineWidth: 2)
                             )
                             .cornerRadius(12)
-                            .shadow(color: .orange.opacity(0.8), radius: 6, x: 0, y: 0)
+                            .shadow(color: .green.opacity(0.8), radius: 6, x: 0, y: 0)
                     }
 
                     // Advanced
@@ -82,12 +84,15 @@ struct PlayView: View {
                     Spacer()
                 }
                 .padding()
+            }.onDisappear {
+
+                shouldRefresh = true
             }
     }
 }
 
 
 #Preview {
-    PlayView(path: .constant(NavigationPath()))
+    PlayView(path: .constant(NavigationPath()),shouldRefresh: .constant(false))
 }
 

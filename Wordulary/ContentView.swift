@@ -15,14 +15,9 @@ struct ContentView: View {
     
     var body: some View {
         
-        if (page==0){
             
             HomeView(play: $page)
-            
-        }
-        else{
-            PlayView(path: .constant(NavigationPath()))
-        }
+        
         
     }
 }

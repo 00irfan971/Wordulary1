@@ -1,15 +1,16 @@
 //
-//  BPlay.swift
+//  IPlay.swift
 //  Wordulary
 //
-//  Created by Irfan on 18/06/25.
+//  Created by Irfan on 23/06/25.
 //
+
 
 import SwiftUI
 import UIKit
-import PostgREST
 
-struct BPlay: View {
+
+struct IPlay: View {
     
     @State private var items: [SentenceItem] = []
     @State private var currentIndex = 0
@@ -25,6 +26,7 @@ struct BPlay: View {
     @State private var iindex: Int = 0
     @State private var aindex: Int = 0
     
+    
     @State private var flicker = true
     
     @Binding var path: NavigationPath
@@ -32,10 +34,11 @@ struct BPlay: View {
     @State private var sentenceBackground: Color = Color.white
 
     
+    
     var body: some View {
         ZStack {
-            if bindex < items.count {
-                let item = items[bindex]
+            if iindex < items.count {
+                let item = items[iindex]
                 
                 
 
@@ -49,7 +52,7 @@ struct BPlay: View {
                                             .foregroundColor(.green)
                                             .padding(.leading, 8)
 
-                                        Text("\(bscore)")
+                                        Text("\(iscore)")
                                             .font(.custom("PressStart2P-Regular", size: 22))
                                             .foregroundColor(.green)
                                             .shadow(color: .green.opacity(0.8), radius: 5, x: 0, y: 0)
@@ -64,7 +67,7 @@ struct BPlay: View {
 
                                         Spacer()
                         
-                        Text("BEGINNER")
+                        Text("ADVANCED")
                             .font(.custom("PressStart2P-Regular", size: 16))
                             .foregroundColor(.cyan)
                             .opacity(flicker ? 1 : 0.85)
@@ -88,28 +91,34 @@ struct BPlay: View {
 
                     
                     ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(sentenceBackground)
-                            .frame(width: 320, height: 150)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.purple, lineWidth: 4)
-                            )
-
-                        Text(item.sentence).foregroundStyle(Color.black)
+                        Text(item.sentence)
                             .font(.system(size: 25, weight: .bold, design: .rounded))
+                            .foregroundColor(.black)
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(sentenceBackground)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.purple, lineWidth: 4)
+                                    )
+                            )
+                            .padding(.top, 60)
+
                     }
                     .padding(.top, 60)
 
                     ZStack {
-                        Rectangle()
-                            .foregroundStyle(Color("Col3").opacity(0.9))
-                            .frame(width: 200, height: 100)
-                            .cornerRadius(20)
-
                         Text(item.option1)
                             .foregroundStyle(Color("Col1"))
                             .font(.system(size: 65, weight: .bold, design: .rounded))
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color("Col3").opacity(0.9))
+                            )
+
                         
                         
                         
@@ -123,54 +132,50 @@ struct BPlay: View {
                                 dragOffset = gesture.translation
                             }
                             .onEnded { _ in
-                                
-                                var validSwipe = false
-                                
                                 if dragOffset.width > 100 {
                                     selection = "correct"
                                     print("✅ Selected as correct")
                                     
                                     if item.correctOption == "1"{
-                                        bscore=bscore+5
+                                        iscore=iscore+5
                                         
                                         sentenceBackground=Color.green
+                                        
                                     }
                                     else{
                                         sentenceBackground=Color.red
-                                        bscore=bscore-1
+                                        iscore=iscore-1
                                         triggerHapticFeedback(success: false)
                                     }
-                                    validSwipe=true
                                 } else if dragOffset.width < -100 {
                                     selection = "wrong"
                                     print("❌ Selected as wrong")
                                     
                                     if item.correctOption == "2"{
-                                        bscore=bscore+5
+                                        iscore=iscore+5
+                                        
                                         sentenceBackground=Color.green
+                                        
+
                                     }
                                     else{
                                         sentenceBackground=Color.red
-                                        bscore=bscore-1
+                                        iscore=iscore-1
                                         triggerHapticFeedback(success: false)
                                     }
-                                    validSwipe=true
                                 }
-
-                                withAnimation {
+                                withAnimation{
                                     dragOffset = .zero
                                 }
-                                
-                                if validSwipe{
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            withAnimation {
-                                                sentenceBackground = Color.white
-                                                
-                                                selection = nil
-                                                bindex += 1
-                                            }
+
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        withAnimation {
+                                            sentenceBackground = Color.white
+                                            
+                                            selection = nil
+                                            iindex += 1
                                         }
-                                }
+                                    }
                             }
                     )
                     .animation(.spring(), value: dragOffset)
@@ -207,7 +212,7 @@ struct BPlay: View {
             }
         }
         .onAppear {
-            items = loadCSV(from: "sentences")
+            items = loadCSV3(from: "sentences")
             print("Loaded \(items.count) items")
             
             
@@ -217,31 +222,31 @@ struct BPlay: View {
                     iscore = scores.iscore
                     ascore = scores.ascore
                     
-                    
-                    bindex = scores.bindex+1
-                    iindex = scores.iindex
+                    bindex = scores.bindex
+                    iindex = scores.iindex+1
                     aindex = scores.aindex
                 }
             }
-
             
             
-            
-        }.onChange(of: bindex) {
+        }.onChange(of: iindex) {
             Task {
                 await saveOrUpdateScore(bscore: bscore, iscore: iscore, ascore: ascore,bindex: bindex,iindex:iindex,aindex: aindex)
             }
         }
-
     }
     
     
-
-
+    func triggerHapticFeedback(success: Bool) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(success ? .success : .error)
+    }
 
     
 }
 
 #Preview {
-    BPlay(path: .constant(NavigationPath()))
+    IPlay(path: .constant(NavigationPath()))
 }
+
