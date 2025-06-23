@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import PostgREST
 
 struct BPlay: View {
@@ -23,6 +24,8 @@ struct BPlay: View {
     @State private var flicker = true
     
     @Binding var path: NavigationPath
+    
+    @State private var sentenceBackground: Color = Color.white
 
     
     var body: some View {
@@ -82,7 +85,7 @@ struct BPlay: View {
                     
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
+                            .fill(sentenceBackground)
                             .frame(width: 320, height: 150)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
@@ -122,6 +125,12 @@ struct BPlay: View {
                                     
                                     if item.correctOption == "1"{
                                         bscore=bscore+10
+                                        
+                                        sentenceBackground=Color.green
+                                    }
+                                    else{
+                                        sentenceBackground=Color.red
+                                        triggerHapticFeedback(success: false)
                                     }
                                 } else if dragOffset.width < -100 {
                                     selection = "wrong"
@@ -129,14 +138,26 @@ struct BPlay: View {
                                     
                                     if item.correctOption == "2"{
                                         bscore=bscore+10
+                                        sentenceBackground=Color.green
+                                    }
+                                    else{
+                                        sentenceBackground=Color.red
+                                        triggerHapticFeedback(success: false)
                                     }
                                 }
 
                                 withAnimation {
                                     dragOffset = .zero
-                                    selection = nil
-                                    currentIndex += 1
                                 }
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        withAnimation {
+                                            sentenceBackground = Color.white
+                                            
+                                            selection = nil
+                                            currentIndex += 1
+                                        }
+                                    }
                             }
                     )
                     .animation(.spring(), value: dragOffset)
@@ -249,6 +270,13 @@ struct BPlay: View {
             print("❌ Failed to load scores: \(error)")
         }
     }
+    
+    func triggerHapticFeedback(success: Bool) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(success ? .success : .error)
+    }
+
 
 
 

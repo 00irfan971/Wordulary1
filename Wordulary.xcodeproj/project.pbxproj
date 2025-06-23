@@ -123,13 +123,6 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
-		52A673932DD89B7A001B23E7 /* Envirionment Values */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "Envirionment Values";
-			sourceTree = "<group>";
-		};
 		52A673962DD89E04001B23E7 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -174,7 +167,6 @@
 				52599C6D2E01405800259AFA /* Info.plist */,
 				52A6739B2DD8AF34001B23E7 /* Model */,
 				52A673962DD89E04001B23E7 /* Extensions */,
-				52A673932DD89B7A001B23E7 /* Envirionment Values */,
 				52AE49AB2DD859610080538C /* WordularyApp.swift */,
 				52AE49AD2DD859610080538C /* ContentView.swift */,
 				52599C742E029B8000259AFA /* HomeView.swift */,

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import UIKit
+
 
 struct APlay: View {
     
@@ -22,6 +24,9 @@ struct APlay: View {
     @State private var flicker = true
     
     @Binding var path: NavigationPath
+    
+    @State private var sentenceBackground: Color = Color.white
+
     
     
     var body: some View {
@@ -86,7 +91,7 @@ struct APlay: View {
                             .padding(20)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color.white)
+                                    .fill(sentenceBackground)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 16)
                                             .stroke(Color.purple, lineWidth: 4)
@@ -101,8 +106,8 @@ struct APlay: View {
                         Text(item.option1)
                             .foregroundStyle(Color("Col1"))
                             .font(.system(size: 65, weight: .bold, design: .rounded))
-                            .padding(.horizontal, 30) // controls background width around text
-                            .padding(.vertical, 20)   // controls background height around text
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 20)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
                                     .fill(Color("Col3").opacity(0.9))
@@ -127,6 +132,14 @@ struct APlay: View {
                                     
                                     if item.correctOption == "1"{
                                         ascore=ascore+10
+                                        
+                                        sentenceBackground=Color.green
+                                        
+                                    }
+                                    else{
+                                        sentenceBackground=Color.red
+                                        
+                                        triggerHapticFeedback(success: false)
                                     }
                                 } else if dragOffset.width < -100 {
                                     selection = "wrong"
@@ -134,14 +147,28 @@ struct APlay: View {
                                     
                                     if item.correctOption == "2"{
                                         ascore=ascore+10
+                                        
+                                        sentenceBackground=Color.green
+                                        
+
+                                    }
+                                    else{
+                                        sentenceBackground=Color.red
+                                        triggerHapticFeedback(success: false)
                                     }
                                 }
-
-                                withAnimation {
+                                withAnimation{
                                     dragOffset = .zero
-                                    selection = nil
-                                    currentIndex += 1
                                 }
+
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        withAnimation {
+                                            sentenceBackground = Color.white
+                                            
+                                            selection = nil
+                                            currentIndex += 1
+                                        }
+                                    }
                             }
                     )
                     .animation(.spring(), value: dragOffset)
@@ -182,6 +209,14 @@ struct APlay: View {
             print("Loaded \(items.count) items")
         }
     }
+    
+    
+    func triggerHapticFeedback(success: Bool) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(success ? .success : .error)
+    }
+
     
 }
 
