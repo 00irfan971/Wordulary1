@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Supabase
 func loadCSV(from fileName: String) -> [SentenceItem] {
     guard let filePath = Bundle.main.path(forResource: "simple_sentences_english", ofType: "csv") else {
         print("CSV file not found.")
@@ -102,3 +103,8 @@ func loadCSV3(from fileName: String) -> [SentenceItem] {
         return []
     }
 }
+
+
+
+
+

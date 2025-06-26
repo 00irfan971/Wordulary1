@@ -18,6 +18,15 @@ struct SentenceItem: Identifiable {
     let notes: String
 }
 
+
+struct SupData: Identifiable, Decodable {
+    let id: Int
+    let sentence: String
+    let word1: String
+    let word2: String
+    let correct: String
+}
+
 struct Profile: Decodable {
   let username: String?
   let fullName: String?

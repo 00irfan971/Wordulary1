@@ -8,9 +8,11 @@
 import SwiftUI
 import UIKit
 import PostgREST
+import Supabase
 
 struct BPlay: View {
     
+    @State private var supData: [SupData] = []
     @State private var items: [SentenceItem] = []
     @State private var currentIndex = 0
 
@@ -34,8 +36,8 @@ struct BPlay: View {
     
     var body: some View {
         ZStack {
-            if bindex < items.count {
-                let item = items[bindex]
+            if bindex < supData.count {
+                let item = supData[bindex]
                 
                 
 
@@ -107,7 +109,7 @@ struct BPlay: View {
                             .frame(width: 200, height: 100)
                             .cornerRadius(20)
 
-                        Text(item.option1)
+                        Text(item.word1)
                             .foregroundStyle(Color("Col1"))
                             .font(.system(size: 65, weight: .bold, design: .rounded))
                         
@@ -125,37 +127,25 @@ struct BPlay: View {
                             .onEnded { _ in
                                 
                                 var validSwipe = false
-                                
+
                                 if dragOffset.width > 100 {
-                                    selection = "correct"
-                                    print("✅ Selected as correct")
-                                    
-                                    if item.correctOption == "1"{
-                                        bscore=bscore+5
-                                        
-                                        sentenceBackground=Color.green
-                                    }
-                                    else{
-                                        sentenceBackground=Color.red
-                                        bscore=bscore-1
-                                        triggerHapticFeedback(success: false)
-                                    }
-                                    validSwipe=true
+                                    handleSelection(isCorrect: true)
+                                    validSwipe = true
                                 } else if dragOffset.width < -100 {
-                                    selection = "wrong"
-                                    print("❌ Selected as wrong")
-                                    
-                                    if item.correctOption == "2"{
-                                        bscore=bscore+5
-                                        sentenceBackground=Color.green
-                                    }
-                                    else{
-                                        sentenceBackground=Color.red
-                                        bscore=bscore-1
-                                        triggerHapticFeedback(success: false)
-                                    }
-                                    validSwipe=true
+                                    handleSelection(isCorrect: false)
+                                    validSwipe = true
                                 }
+
+                                if validSwipe {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        withAnimation {
+                                            sentenceBackground = .white
+                                            selection = nil
+                                            bindex += 1
+                                        }
+                                    }
+                                }
+
 
                                 withAnimation {
                                     dragOffset = .zero
@@ -178,15 +168,41 @@ struct BPlay: View {
                     HStack{
                         
                         
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.red)
-                            .font(.system(size: 60))
+                        Button(action:{
+                            handleSelection(isCorrect: false)
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation {
+                                        sentenceBackground = Color.white
+                                        
+                                        selection = nil
+                                        bindex += 1
+                                    }
+                                }
+                        }){
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red)
+                                .font(.system(size: 60))
+                        }
                         
                         Spacer()
                 
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.system(size: 60))
+                        Button(action:{
+                            handleSelection(isCorrect: true)
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation {
+                                        sentenceBackground = Color.white
+                                        
+                                        selection = nil
+                                        bindex += 1
+                                    }
+                                }
+                        }){
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 60))
+                        }
 
         
                         
@@ -207,11 +223,16 @@ struct BPlay: View {
             }
         }
         .onAppear {
-            items = loadCSV(from: "sentences")
-            print("Loaded \(items.count) items")
+            
+
+            //items = loadCSV(from: "sentences")
+
+
             
             
             Task {
+                await loadSentencesB()
+                
                 if let scores = await fetchScoreFromSupabase() {
                     bscore = scores.bscore
                     iscore = scores.iscore
@@ -222,6 +243,8 @@ struct BPlay: View {
                     iindex = scores.iindex
                     aindex = scores.aindex
                 }
+                
+                print("Loaded \(supData.count) items")
             }
 
             
@@ -235,7 +258,53 @@ struct BPlay: View {
 
     }
     
+    func loadSentencesB() async {
+        do {
+            let response: [SupData] = try await supabase
+                .from("bdata")
+                .select()
+                .execute()
+                .value
+            supData = response
+            print("Yaaayyyy")
+        } catch {
+            print("Error fetching: \(error)")
+        }
+    }
     
+    
+    
+    func handleSelection(isCorrect: Bool) {
+        guard bindex < supData.count else { return }
+        let item = supData[bindex]
+        
+        if isCorrect {
+            print("✅ Selected as correct")
+            if item.correct == "1" {
+                bscore += 5
+                sentenceBackground = .green
+            } else {
+                bscore -= 1
+                sentenceBackground = .red
+                triggerHapticFeedback(success: false)
+            }
+        } else {
+            print("❌ Selected as wrong")
+            if item.correct == "2" {
+                bscore += 5
+                sentenceBackground = .green
+            } else {
+                bscore -= 1
+                sentenceBackground = .red
+                triggerHapticFeedback(success: false)
+            }
+        }
+        
+        // Reset after short delay
+        
+    }
+
+
 
 
 

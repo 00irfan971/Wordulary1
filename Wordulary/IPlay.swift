@@ -12,6 +12,7 @@ import UIKit
 
 struct IPlay: View {
     
+    @State private var supData: [SupData] = []
     @State private var items: [SentenceItem] = []
     @State private var currentIndex = 0
 
@@ -37,8 +38,8 @@ struct IPlay: View {
     
     var body: some View {
         ZStack {
-            if iindex < items.count {
-                let item = items[iindex]
+            if iindex < supData.count {
+                let item = supData[iindex]
                 
                 
 
@@ -109,7 +110,7 @@ struct IPlay: View {
                     .padding(.top, 60)
 
                     ZStack {
-                        Text(item.option1)
+                        Text(item.word1)
                             .foregroundStyle(Color("Col1"))
                             .font(.system(size: 65, weight: .bold, design: .rounded))
                             .padding(.horizontal, 30)
@@ -132,50 +133,35 @@ struct IPlay: View {
                                 dragOffset = gesture.translation
                             }
                             .onEnded { _ in
+                                
+                                var validSwipe = false
                                 if dragOffset.width > 100 {
-                                    selection = "correct"
-                                    print("✅ Selected as correct")
                                     
-                                    if item.correctOption == "1"{
-                                        iscore=iscore+5
-                                        
-                                        sentenceBackground=Color.green
-                                        
-                                    }
-                                    else{
-                                        sentenceBackground=Color.red
-                                        iscore=iscore-1
-                                        triggerHapticFeedback(success: false)
-                                    }
+                                    handleSelection(isCorrect: true)
+                                    
+                                    
+                                    validSwipe = true
                                 } else if dragOffset.width < -100 {
-                                    selection = "wrong"
-                                    print("❌ Selected as wrong")
                                     
-                                    if item.correctOption == "2"{
-                                        iscore=iscore+5
-                                        
-                                        sentenceBackground=Color.green
-                                        
-
-                                    }
-                                    else{
-                                        sentenceBackground=Color.red
-                                        iscore=iscore-1
-                                        triggerHapticFeedback(success: false)
-                                    }
+                                    
+                                    handleSelection(isCorrect: false)
+                                    
+                                    validSwipe = true
                                 }
                                 withAnimation{
                                     dragOffset = .zero
                                 }
 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        withAnimation {
-                                            sentenceBackground = Color.white
-                                            
-                                            selection = nil
-                                            iindex += 1
+                                if validSwipe{
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            withAnimation {
+                                                sentenceBackground = Color.white
+                                                
+                                                selection = nil
+                                                iindex += 1
+                                            }
                                         }
-                                    }
+                                }
                             }
                     )
                     .animation(.spring(), value: dragOffset)
@@ -183,15 +169,44 @@ struct IPlay: View {
                     HStack{
                         
                         
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.red)
-                            .font(.system(size: 60))
+                        Button(action:{
+                            handleSelection(isCorrect: false)
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation {
+                                        sentenceBackground = Color.white
+                                        
+                                        selection = nil
+                                        iindex += 1
+                                    }
+                                }
+                        }){
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red)
+                                .font(.system(size: 60))
+                        }
                         
                         Spacer()
                 
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.system(size: 60))
+                        Button(action:{
+                            handleSelection(isCorrect: true)
+                            
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation {
+                                        sentenceBackground = Color.white
+                                        
+                                        selection = nil
+                                        iindex += 1
+                                    }
+                                }
+                            
+                            
+                        }){
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.system(size: 60))
+                        }
 
         
                         
@@ -212,11 +227,14 @@ struct IPlay: View {
             }
         }
         .onAppear {
-            items = loadCSV3(from: "sentences")
-            print("Loaded \(items.count) items")
+            //items = loadCSV3(from: "sentences")
+            
             
             
             Task {
+                
+                await loadSentencesI()
+                
                 if let scores = await fetchScoreFromSupabase() {
                     bscore = scores.bscore
                     iscore = scores.iscore
@@ -226,6 +244,8 @@ struct IPlay: View {
                     iindex = scores.iindex+1
                     aindex = scores.aindex
                 }
+                
+                print("Loaded \(supData.count) items")
             }
             
             
@@ -241,6 +261,52 @@ struct IPlay: View {
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(success ? .success : .error)
+    }
+    
+    
+    func loadSentencesI() async {
+        do {
+            let response: [SupData] = try await supabase
+                .from("idata")
+                .select()
+                .execute()
+                .value
+            supData = response
+            print("Yaaayyyy")
+        } catch {
+            print("Error fetching: \(error)")
+        }
+    }
+    
+    
+    func handleSelection(isCorrect: Bool) {
+        guard iindex < supData.count else { return }
+        let item = supData[iindex]
+        
+        if isCorrect {
+            print("✅ Selected as correct")
+            if item.correct == "1" {
+                iscore += 5
+                sentenceBackground = .green
+            } else {
+                iscore -= 2
+                sentenceBackground = .red
+                triggerHapticFeedback(success: false)
+            }
+        } else {
+            print("❌ Selected as wrong")
+            if item.correct == "2" {
+                iscore += 5
+                sentenceBackground = .green
+            } else {
+                iscore -= 2
+                sentenceBackground = .red
+                triggerHapticFeedback(success: false)
+            }
+        }
+        
+        // Reset after short delay
+        
     }
 
     

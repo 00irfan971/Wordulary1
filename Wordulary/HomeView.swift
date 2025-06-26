@@ -129,7 +129,15 @@ struct HomeView: View {
                             .shadow(color: .blue.opacity(0.9), radius: 6, x: 0, y: 0)
                     }
                 }
-            }
+            }.toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Sign Out", role: .destructive) {
+                    Task {
+                      try? await supabase.auth.signOut()
+                    }
+                  }.foregroundStyle(Color.red)
+                }
+              }
             
         }.onAppear{
             
